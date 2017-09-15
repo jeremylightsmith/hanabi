@@ -3,9 +3,9 @@ import { render } from 'react-dom'
 import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
 import { createLogger } from 'redux-logger'
-import reducer from './reducer'
+import reducer from './hanabi/reducer'
 
-import Board from './components/board'
+import Board from './hanabi/components/board'
 
 let store = null
 
