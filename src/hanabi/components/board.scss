@@ -1,21 +1,53 @@
-.Board {
-  .Hand {
-    .Card {
-      &.color-R {
-        color: red;
-      }
-      &.color-G {
-        color: green;
-      }
-      &.color-B {
-        color: blue;
-      }
-      &.color-W {
-        color: gray;
-      }
-      &.color-Y {
-        color: yellow;
-      }
+body {
+  background-color: lightgray;
+}
+
+.board {
+  .table {
+
+  }
+  .players {
+
+    .player {
+      display: inline-block;
+      margin-right: 20px;
     }
   }
+}
+
+.card {
+  font-size: 2em;
+  font-family: 'Caveat Brush', cursive;
+  background-color: #242075;
+  display: inline-block;
+  height: 40px;
+  width: 20px;
+  margin: 3px;
+  padding: 4px 10px;
+  text-align: center;
+  cursor: pointer;
+  &.color-R {
+    color: #e11f5b;
+  }
+  &.color-G {
+    color: #0aac4b;
+  }
+  &.color-B {
+    color: #18bade;
+  }
+  &.color-W {
+    color: #f7fcfd;
+  }
+  &.color-Y {
+    color: #f6f210;
+  }
+  &.selected {
+    -webkit-box-shadow: 0px 0px 5px 2px rgba(255,255,255,1);
+    -moz-box-shadow: 0px 0px 5px 2px rgba(255,255,255,1);
+    box-shadow: 0px 0px 5px 2px rgba(255,255,255,1);
+  }
+}
+
+h4 {
+  margin: 0;
 }

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { equals, filter } from 'ramda'
-import { dealCard, dealCards, shuffle } from './model'
+import { dealCard, dealCards, discardCard, playCard, shuffle } from './model'
 
 describe('hanabi.model', () => {
   describe('#dealCard', () => {
@@ -14,20 +14,20 @@ describe('hanabi.model', () => {
           { hand: [] },
         ]
       }
-      state = dealCard(state, 0)
+      state = dealCard(0, state)
 
       expect(state.deck).to.eql(['R2', 'R3'])
-      expect(state.players[0]).to.eql({hand: ['R1']})
+      expect(state.players[0]).to.eql({ hand: ['R1'] })
 
-      state = dealCard(state, 1)
+      state = dealCard(1, state)
 
       expect(state.deck).to.eql(['R3'])
-      expect(state.players[1]).to.eql({hand: ['R2']})
+      expect(state.players[1]).to.eql({ hand: ['R2'] })
 
-      state = dealCard(state, 0)
+      state = dealCard(0, state)
 
       expect(state.deck).to.eql([])
-      expect(state.players[0]).to.eql({hand: ['R1', 'R3']})
+      expect(state.players[0]).to.eql({ hand: ['R1', 'R3'] })
     })
   })
 
@@ -67,6 +67,76 @@ describe('hanabi.model', () => {
       expect(deck.length).to.eql(50)
       expect(filter(equals('R1'), deck).length).to.eql(3)
       expect(filter(equals('G5'), deck).length).to.eql(1)
+    })
+  })
+
+  describe('#playCard', () => {
+    it('should play card', () => {
+      let state = {
+        table: {
+          R: null,
+          G: null,
+          Y: null,
+        },
+        players: [
+          { hand: ['R1', 'G2', 'Y5'] },
+        ]
+      }
+
+      state = playCard(0, 0, state)
+      expect(state).to.eql({
+          table: {
+            R: 1,
+            G: null,
+            Y: null,
+          },
+          players: [
+            { hand: ['G2', 'Y5'] },
+          ]
+        }
+      )
+
+      state = playCard(0, 1, state)
+      expect(state).to.eql({
+          table: {
+            R: 1,
+            G: null,
+            Y: 5,
+          },
+          players: [
+            { hand: ['G2'] },
+          ]
+        }
+      )
+    })
+  })
+
+  describe('#discardCard', () => {
+    it('should discard card', () => {
+      let state = {
+        discards: [],
+        players: [
+          { hand: ['R1', 'G2', 'Y5'] },
+        ]
+      }
+
+      state = discardCard(0, 0, state)
+      expect(state).to.eql({
+          discards: ['R1'],
+          players: [
+            { hand: ['G2', 'Y5'] },
+          ]
+        }
+      )
+
+      state = discardCard(0, 1, state)
+      expect(state).to.eql({
+          discards: ['Y5', 'R1'],
+          players: [
+            { hand: ['G2'] },
+          ]
+        }
+      )
     })
   })
 })

@@ -6,6 +6,7 @@ import { createLogger } from 'redux-logger'
 import reducer from './hanabi/reducer'
 
 import Board from './hanabi/components/board'
+import { startGame } from './hanabi/actions'
 
 let store = null
 
@@ -21,6 +22,8 @@ function init() {
       applyMiddleware(...middleware),
       window.devToolsExtension ? window.devToolsExtension() : f => f),
   )
+
+  store.dispatch(startGame())
 
   render(
     <Provider store={store}>

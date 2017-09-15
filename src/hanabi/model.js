@@ -1,18 +1,20 @@
 // @flow
-import { append, flatten, pipe, remove } from 'ramda'
+import { append, assocPath, curry, flatten, path, pipe, prepend, remove } from 'ramda'
 
-import type { BoardT } from './types'
+import type { BoardT, CardT } from './types'
 import { updateIn } from '../ramda_helpers'
 
+export const COLORS = ['R', 'G', 'B', 'Y', 'W']
+
 const newDeck = () => (
-  flatten(['R', 'G', 'B', 'Y', 'W'].map(color => (
+  flatten(COLORS.map(color => (
     [1, 1, 1, 2, 2, 3, 3, 4, 4, 5].map(number => (
       `${color}${number}`
     ))
   )))
 )
 
-export const shuffle = (state: BoardT) => {
+export const shuffle = (board: BoardT) => {
   let deck = newDeck()
   const shuffledDeck = []
 
@@ -24,25 +26,51 @@ export const shuffle = (state: BoardT) => {
   }
 
   return {
-    ...state,
+    ...board,
     deck: shuffledDeck,
   }
 }
 
-export const dealCard = (state: BoardT, player: number) => {
-  const nextCard = state.deck[0]
+export const dealCard = curry((player: number, board: BoardT) => {
+  const nextCard = board.deck[0]
   return pipe(
     updateIn(['deck'], remove(0, 1)),
     updateIn(['players', player, 'hand'], append(nextCard))
-  )(state)
-}
+  )(board)
+})
 
-export const dealCards = (state: BoardT) => {
-  let newState = state;
+export const dealCards = (board: BoardT) => {
+  let newState = board;
   [1, 2, 3, 4].forEach(() => {
-    state.players.forEach((_, player: number) => {
-      newState = dealCard(newState, player)
+    board.players.forEach((_, player: number) => {
+      newState = dealCard(player, newState)
     })
   })
   return newState
 }
+
+export const colorOf = (card: CardT) => card[0]
+export const numberOn = (card: CardT) => parseInt(card[1])
+
+const getCard = (playerIndex: number, cardIndex: number, board: BoardT) =>
+  path(['players', playerIndex, 'hand', cardIndex])(board)
+
+const removeCard = curry((playerIndex: number, cardIndex: number, board: BoardT) =>
+  updateIn(['players', playerIndex, 'hand'], remove(cardIndex, 1))(board)
+)
+
+export const playCard = curry((playerIndex: number, cardIndex: number, board: BoardT) => {
+  const card = getCard(playerIndex, cardIndex, board)
+  return pipe(
+    assocPath(['table', colorOf(card)], numberOn(card)),
+    removeCard(playerIndex, cardIndex),
+  )(board)
+})
+
+export const discardCard = curry((playerIndex: number, cardIndex: number, board: BoardT) => {
+  const card = getCard(playerIndex, cardIndex, board)
+  return pipe(
+    updateIn(['discards'], prepend(card)),
+    removeCard(playerIndex, cardIndex),
+  )(board)
+})

@@ -1,7 +1,7 @@
 // @flow
 import { pipe } from 'ramda'
 import * as c from './constants'
-import { dealCards, shuffle } from './model'
+import { dealCard, dealCards, discardCard, playCard, shuffle } from './model'
 
 const INITIAL_STATE = {
   deck: [],
@@ -28,6 +28,18 @@ export default function reducer(state: any = INITIAL_STATE, action: any) {
           { hand: [] },
         ]
       })
+
+    case c.PLAY_CARD:
+      return pipe(
+        playCard(action.player, action.card),
+        dealCard(action.player)
+      )(state)
+
+    case c.DISCARD_CARD:
+      return pipe(
+        discardCard(action.player, action.card),
+        dealCard(action.player)
+      )(state)
 
     default:
       return state
