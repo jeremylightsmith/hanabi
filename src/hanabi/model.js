@@ -17,7 +17,7 @@ export const shuffle = (state: BoardT) => {
   const shuffledDeck = []
 
   while (deck.length > 0) {
-    const i = Math.random() * deck.length
+    const i = Math.floor(Math.random() * deck.length)
     const card = deck[i]
     shuffledDeck.push(card)
     deck = remove(i, 1, deck)

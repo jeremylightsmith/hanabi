@@ -1,5 +1,6 @@
 import { expect } from 'chai'
-import { dealCard, dealCards } from './model'
+import { equals, filter } from 'ramda'
+import { dealCard, dealCards, shuffle } from './model'
 
 describe('hanabi.model', () => {
   describe('#dealCard', () => {
@@ -57,6 +58,15 @@ describe('hanabi.model', () => {
           { hand: ['R4', 'G4', 'B4', 'Y4'] },
         ]
       })
+    })
+  })
+
+  describe('#shuffle', () => {
+    it('should have a bunch of cards', () => {
+      const deck = shuffle({}).deck
+      expect(deck.length).to.eql(50)
+      expect(filter(equals('R1'), deck).length).to.eql(3)
+      expect(filter(equals('G5'), deck).length).to.eql(1)
     })
   })
 })

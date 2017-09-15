@@ -1,0 +1,21 @@
+.Board {
+  .Hand {
+    .Card {
+      &.color-R {
+        color: red;
+      }
+      &.color-G {
+        color: green;
+      }
+      &.color-B {
+        color: blue;
+      }
+      &.color-W {
+        color: gray;
+      }
+      &.color-Y {
+        color: yellow;
+      }
+    }
+  }
+}
