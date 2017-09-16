@@ -6,7 +6,7 @@ import { discardCard, playCard, startGame } from '../actions'
 import type { CardT, ColorT, PlayerT } from '../types'
 
 import './board.scss'
-import { COLORS } from '../model'
+import { COLORS, getCurrentPlayer } from '../model'
 
 class Card extends PureComponent {
   props: {
@@ -28,7 +28,7 @@ class Card extends PureComponent {
 
 class EmptyCard extends PureComponent {
   render() {
-    return <div className="card empty-card"/>
+    return <div className="card empty-card" />
   }
 }
 
@@ -37,6 +37,7 @@ class Player extends PureComponent {
     player: PlayerT,
     dispatch: any,
     index: number,
+    current: boolean,
   }
 
   state = {
@@ -47,28 +48,36 @@ class Player extends PureComponent {
     selected: ?number,
   }
 
+  componentDidUpdate(prevState, prevProps) {
+    if (prevProps.current && !this.props.current && this.state.selected !== null) {
+      this.setState({ selected: null })
+    }
+  }
+
   renderCard = (card: CardT, i: number) => {
-    const { dispatch } = this.props
+    const { dispatch, current } = this.props
     const { selected } = this.state
+
+    const onClick = current ? (() => {
+      this.setState({ selected: (this.state.selected === i ? null : i) })
+    }) : undefined
 
     return (
       <Card card={card}
             dispatch={dispatch}
             selected={selected === i}
-            onClick={() => {
-              this.setState({ selected: (this.state.selected === i ? null : i) })
-            }}
+            onClick={onClick}
             key={i} />
     )
   }
 
   render() {
-    const { player, index, dispatch } = this.props
+    const { player, index, dispatch, current } = this.props
     const { selected } = this.state
 
     return (
       <div className="player">
-        <h4>Player {index}</h4>
+        <h4>Player {index} {current ? '(on deck)' : ''}</h4>
         <div className="hand">
           {player.hand.map(this.renderCard)}
         </div>
@@ -116,22 +125,43 @@ class Table extends PureComponent {
   }
 }
 
+class Discards extends PureComponent {
+  props: {
+    discards: CardT[],
+  }
+
+  render() {
+    const { discards } = this.props
+
+    return (
+      <div className="table">
+        <h4>Discards</h4>
+
+        {discards.map(card => <Card card={card} />)}
+      </div>
+    )
+  }
+}
+
 class Board extends PureComponent {
   props: {
     players: PlayerT[],
     table: { [ColorT]: number },
+    discards: CardT[],
     dispatch: any,
+    currentPlayer: number,
   }
 
   render() {
-    const { dispatch, table, players } = this.props
+    const { dispatch, table, discards, players, currentPlayer } = this.props
     return (
       <div className="board">
         <Table table={table} />
+        <Discards discards={discards} />
 
         <div className="players">
           {players && players.map((player, i) =>
-            <Player player={player} dispatch={dispatch} key={i} index={i} />
+            <Player player={player} dispatch={dispatch} key={i} index={i} current={currentPlayer === i} />
           )}
         </div>
 
@@ -143,7 +173,10 @@ class Board extends PureComponent {
 
 const mapStateToProps = (state) => {
   const { deck, players, discards, table, lastMove, livesLeft, hintsLeft } = state
-  return { deck, players, discards, table, lastMove, livesLeft, hintsLeft }
+  return {
+    deck, players, discards, table, lastMove, livesLeft, hintsLeft,
+    currentPlayer: getCurrentPlayer(state)
+  }
 }
 
 export default connect(mapStateToProps, null)(Board)

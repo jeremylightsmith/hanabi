@@ -1,5 +1,5 @@
 // @flow
-import { append, assocPath, curry, flatten, path, pipe, prepend, remove } from 'ramda'
+import { assoc, append, assocPath, curry, flatten, path, pipe, prepend, remove } from 'ramda'
 
 import type { BoardT, CardT } from './types'
 import { updateIn } from '../ramda_helpers'
@@ -33,6 +33,7 @@ export const shuffle = (board: BoardT) => {
 
 export const dealCard = curry((player: number, board: BoardT) => {
   const nextCard = board.deck[0]
+  if (!nextCard) return board
   return pipe(
     updateIn(['deck'], remove(0, 1)),
     updateIn(['players', player, 'hand'], append(nextCard))
@@ -64,6 +65,7 @@ export const playCard = curry((playerIndex: number, cardIndex: number, board: Bo
   return pipe(
     assocPath(['table', colorOf(card)], numberOn(card)),
     removeCard(playerIndex, cardIndex),
+    assoc('lastMove', {player: playerIndex, type: 'play'}),
   )(board)
 })
 
@@ -72,5 +74,11 @@ export const discardCard = curry((playerIndex: number, cardIndex: number, board:
   return pipe(
     updateIn(['discards'], prepend(card)),
     removeCard(playerIndex, cardIndex),
+    assoc('lastMove', {player: playerIndex, type: 'discard'}),
   )(board)
 })
+
+export const getCurrentPlayer = (board: BoardT) => {
+  const lastPlayer = path(['lastMove', 'player'], board)
+  return lastPlayer === undefined ? 0 : (lastPlayer + 1) % board.players.length
+}

@@ -20,12 +20,14 @@ describe('hanabi.model', () => {
       expect(state.players[0]).to.eql({ hand: ['R1'] })
 
       state = dealCard(1, state)
-
       expect(state.deck).to.eql(['R3'])
       expect(state.players[1]).to.eql({ hand: ['R2'] })
 
       state = dealCard(0, state)
+      expect(state.deck).to.eql([])
+      expect(state.players[0]).to.eql({ hand: ['R1', 'R3'] })
 
+      state = dealCard(0, state)
       expect(state.deck).to.eql([])
       expect(state.players[0]).to.eql({ hand: ['R1', 'R3'] })
     })
@@ -92,7 +94,8 @@ describe('hanabi.model', () => {
           },
           players: [
             { hand: ['G2', 'Y5'] },
-          ]
+          ],
+          lastMove: { player: 0, type: 'play' },
         }
       )
 
@@ -105,7 +108,8 @@ describe('hanabi.model', () => {
           },
           players: [
             { hand: ['G2'] },
-          ]
+          ],
+          lastMove: { player: 0, type: 'play' },
         }
       )
     })
@@ -125,7 +129,8 @@ describe('hanabi.model', () => {
           discards: ['R1'],
           players: [
             { hand: ['G2', 'Y5'] },
-          ]
+          ],
+          lastMove: { player: 0, type: 'discard' },
         }
       )
 
@@ -134,7 +139,8 @@ describe('hanabi.model', () => {
           discards: ['Y5', 'R1'],
           players: [
             { hand: ['G2'] },
-          ]
+          ],
+          lastMove: { player: 0, type: 'discard' },
         }
       )
     })
