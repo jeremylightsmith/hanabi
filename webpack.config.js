@@ -53,7 +53,7 @@ if (production) {
     port: 5000,
     headers: { 'Access-Control-Allow-Origin': '*' }
   };
-  config.output.publicPath = '//localhost:5000/webpack/';
+  config.output.publicPath = '//localhost:5000/dist/';
   config.devtool = 'eval-source-map';
 }
 
