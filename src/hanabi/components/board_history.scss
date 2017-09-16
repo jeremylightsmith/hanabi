@@ -1,0 +1,31 @@
+$history-container-width: 200px;
+
+.board-history {
+  .board-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: $history-container-width;
+    overflow: auto;
+  }
+  .history-container {
+    background-color: #420000;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: $history-container-width;
+    overflow: auto;
+    .history {
+      .history-link {
+        background-color: white;
+        margin: 2px 4px;
+        padding: 2px 4px;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+      }
+    }
+  }
+}

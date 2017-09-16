@@ -1,14 +1,14 @@
 // @flow
 import { pipe } from 'ramda'
-import * as c from './constants'
-import { dealCard, dealCards, discardCard, playCard, shuffle } from './model'
+import * as c from '../constants'
+import { dealCard, dealCards, discardCard, playCard, shuffle } from '../model'
 
-const INITIAL_STATE = {
+export const INITIAL_STATE = {
   deck: [],
   players: [],
   discards: [],
   table: {},
-  lastMove: {},
+  lastMove: null,
   livesLeft: 4,
   hintsLeft: 8,
 }

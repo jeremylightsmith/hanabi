@@ -3,9 +3,9 @@ import { render } from 'react-dom'
 import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
 import { createLogger } from 'redux-logger'
-import reducer from './hanabi/reducer'
+import reducer from './hanabi/reducers/history_reducer'
 
-import Board from './hanabi/components/board'
+import BoardHistory from './hanabi/components/board_history'
 import { startGame } from './hanabi/actions'
 
 let store = null
@@ -27,7 +27,7 @@ function init() {
 
   render(
     <Provider store={store}>
-      <Board />
+      <BoardHistory />
     </Provider>,
     document.getElementById('hanabi-app'),
   )

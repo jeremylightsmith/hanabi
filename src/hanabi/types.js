@@ -27,7 +27,12 @@ export type BoardT = {
   players: PlayerT[],
   discards: CardT[],
   table: { [ColorT]: ?number },
-  lastMove: MoveT,
+  lastMove: ?MoveT,
   livesLeft: number,
   hintsLeft: number,
+}
+
+export type AllBoardsT = {
+  currentBoard: BoardT,
+  boards: BoardT[],
 }

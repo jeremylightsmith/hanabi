@@ -1,6 +1,5 @@
 // @flow
 import React, { PureComponent } from 'react'
-import { connect } from 'react-redux'
 import { identity, times } from 'ramda'
 import { discardCard, playCard, startGame } from '../actions'
 import type { BoardT, CardT, ColorT, PlayerT } from '../types'
@@ -137,7 +136,7 @@ const Hints = ({ hints }: {
   </div>
 )
 
-class Board extends PureComponent {
+export default class Board extends PureComponent {
   props: {
     board: BoardT,
     dispatch: any,
@@ -166,11 +165,3 @@ class Board extends PureComponent {
     )
   }
 }
-
-const mapStateToProps = (state) => {
-  return {
-    board: state,
-  }
-}
-
-export default connect(mapStateToProps, null)(Board)
