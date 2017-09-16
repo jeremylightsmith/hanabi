@@ -6,6 +6,17 @@ body {
   .table {
 
   }
+
+  .lives {
+    .life {
+      background-color: red;
+    }
+  }
+  .hints {
+    .hint {
+      background-color: dimgray;
+    }
+  }
   .players {
 
     .player {
@@ -13,6 +24,17 @@ body {
       margin-right: 20px;
     }
   }
+}
+
+$circle-size: 15px;
+.circle {
+  height: $circle-size;
+  width: $circle-size;
+  -webkit-border-radius: $circle-size;
+  -moz-border-radius: $circle-size;
+  border-radius: $circle-size;
+  display: inline-block;
+  margin-right: 3px;
 }
 
 .card {

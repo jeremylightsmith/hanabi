@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { equals, filter } from 'ramda'
-import { dealCard, dealCards, discardCard, playCard, shuffle } from './model'
+import { dealCard, dealCards, didWin, discardCard, isGameOver, playCard, shuffle } from './model'
 
 describe('hanabi.model', () => {
   describe('#dealCard', () => {
@@ -73,7 +73,7 @@ describe('hanabi.model', () => {
   })
 
   describe('#playCard', () => {
-    it('should play card', () => {
+    it('should play card if valid', () => {
       let state = {
         table: {
           R: null,
@@ -82,6 +82,7 @@ describe('hanabi.model', () => {
         },
         players: [
           { hand: ['R1', 'G2', 'Y5'] },
+          { hand: ['R2', 'G1', 'Y5'] },
         ]
       }
 
@@ -94,24 +95,91 @@ describe('hanabi.model', () => {
           },
           players: [
             { hand: ['G2', 'Y5'] },
+            { hand: ['R2', 'G1', 'Y5'] },
           ],
           lastMove: { player: 0, type: 'play' },
         }
       )
 
-      state = playCard(0, 1, state)
+      state = playCard(1, 1, state)
+      state = playCard(1, 0, state)
       expect(state).to.eql({
           table: {
-            R: 1,
-            G: null,
-            Y: 5,
+            R: 2,
+            G: 1,
+            Y: null,
           },
           players: [
-            { hand: ['G2'] },
+            { hand: ['G2', 'Y5'] },
+            { hand: ['Y5'] },
           ],
+          lastMove: { player: 1, type: 'play' },
+        }
+      )
+    })
+
+    it('should take a life and discard if invalid', () => {
+      let state = {
+        table: {
+          R: null,
+          G: 1,
+        },
+        players: [
+          { hand: ['R3', 'G3'] },
+        ],
+        livesLeft: 2,
+      }
+
+      state = playCard(0, 0, state)
+      expect(state).to.eql({
+          table: {
+            R: null,
+            G: 1,
+          },
+          players: [
+            { hand: ['G3'] },
+          ],
+          discards: ['R3'],
+          livesLeft: 1,
           lastMove: { player: 0, type: 'play' },
         }
       )
+      expect(isGameOver(state)).to.eql(false)
+
+      state = playCard(0, 0, state)
+      expect(state).to.eql({
+          table: {
+            R: null,
+            G: 1,
+          },
+          players: [
+            { hand: [] },
+          ],
+          discards: ['G3', 'R3'],
+          livesLeft: 0,
+          lastMove: { player: 0, type: 'play' },
+        }
+      )
+      expect(isGameOver(state)).to.eql(true)
+      expect(didWin(state)).to.eql(false)
+    })
+  })
+
+  describe('#didWin', () => {
+    it('should know when the game is won', () => {
+      let board = {
+        table: { R: 5, G: 5, B: 5, W: 5, Y: 5 },
+      }
+
+      expect(isGameOver(board)).to.eql(true)
+      expect(didWin(board)).to.eql(true)
+
+      board.table.R = 4
+      expect(isGameOver(board)).to.eql(false)
+      expect(didWin(board)).to.eql(false)
+
+      board.table.G = undefined
+      expect(didWin(board)).to.eql(false)
     })
   })
 

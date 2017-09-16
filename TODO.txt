@@ -1,0 +1,6 @@
+[ ] keep track of and show lives - blow up and discard w/ invalid play
+[ ] keep track of and show hints
+[ ] at the end of game, show WON or LOST
+[ ] allow a player to get boardUpdate(prev, current) and getMove(board)
+[ ] show all moves / versions of board
+[ ] be able to go back to a previous state of a board and forward / back

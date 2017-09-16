@@ -1,35 +1,25 @@
 // @flow
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import { toPairs } from 'ramda'
+import { identity, times } from 'ramda'
 import { discardCard, playCard, startGame } from '../actions'
-import type { CardT, ColorT, PlayerT } from '../types'
+import type { BoardT, CardT, ColorT, PlayerT } from '../types'
 
 import './board.scss'
 import { COLORS, getCurrentPlayer } from '../model'
 
-class Card extends PureComponent {
-  props: {
-    card: CardT,
-    onClick?: () => void,
-    selected?: boolean,
-  }
+const Card = ({ card, onClick, selected }: {
+  card: CardT,
+  onClick?: () => void,
+  selected?: boolean,
+}) => (
+  <div className={`card color-${card[0]} ${selected ? 'selected' : ''}`} onClick={onClick}>
+    {card[1]}{' '}
+  </div>
+)
 
-  render() {
-    const { card, onClick, selected } = this.props
-
-    return (
-      <div className={`card color-${card[0]} ${selected ? 'selected' : ''}`} onClick={onClick}>
-        {card[1]}{' '}
-      </div>
-    )
-  }
-}
-
-class EmptyCard extends PureComponent {
-  render() {
-    return <div className="card empty-card" />
-  }
+const EmptyCard = () => {
+  return <div className="card empty-card" />
 }
 
 class Player extends PureComponent {
@@ -100,64 +90,70 @@ class Player extends PureComponent {
   }
 }
 
-class Table extends PureComponent {
-  props: {
-    table: { [ColorT]: number }
-  }
+const Table = ({ table }: {
+  table: { [ColorT]: number }
+}) => (
+  <div className="table">
+    <h4>Table</h4>
 
-  render() {
-    const { table } = this.props
+    {COLORS.map(color => (
+      table[color] !== undefined ? (
+        <Card card={`${color}${table[color]}`} key={color} />
+      ) : (
+        <EmptyCard key={color} />
+      )
+    ))}
 
-    return (
-      <div className="table">
-        <h4>Table</h4>
+  </div>
+)
 
-        {COLORS.map(color => (
-          table[color] !== undefined ? (
-            <Card card={`${color}${table[color]}`} key={color} />
-          ) : (
-            <EmptyCard key={color} />
-          )
-        ))}
+const Discards = ({ discards }: {
+  discards: CardT[],
+}) => (
+  <div className="table">
+    <h4>Discards</h4>
 
-      </div>
-    )
-  }
-}
+    {discards.map(card => <Card card={card} />)}
+  </div>
+)
 
-class Discards extends PureComponent {
-  props: {
-    discards: CardT[],
-  }
+const Lives = ({ lives }: {
+  lives: number,
+}) => (
+  <div className="lives">
+    <h4>Lives</h4>
 
-  render() {
-    const { discards } = this.props
+    {times(identity, lives).map((i) => <div className="life circle" key={i} />)}
+  </div>
+)
 
-    return (
-      <div className="table">
-        <h4>Discards</h4>
+const Hints = ({ hints }: {
+  hints: number,
+}) => (
+  <div className="hints">
+    <h4>Hints</h4>
 
-        {discards.map(card => <Card card={card} />)}
-      </div>
-    )
-  }
-}
+    {times(identity, hints).map((i) => <div className="hint circle" key={i} />)}
+  </div>
+)
 
 class Board extends PureComponent {
   props: {
-    players: PlayerT[],
-    table: { [ColorT]: number },
-    discards: CardT[],
+    board: BoardT,
     dispatch: any,
-    currentPlayer: number,
   }
 
   render() {
-    const { dispatch, table, discards, players, currentPlayer } = this.props
+    const { dispatch, board } = this.props
+    const { table, discards, players, livesLeft, hintsLeft } = board
+    const currentPlayer = getCurrentPlayer(board)
+
     return (
       <div className="board">
         <Table table={table} />
         <Discards discards={discards} />
+        <Lives lives={livesLeft} />
+        <Hints hints={hintsLeft} />
 
         <div className="players">
           {players && players.map((player, i) =>
@@ -172,10 +168,8 @@ class Board extends PureComponent {
 }
 
 const mapStateToProps = (state) => {
-  const { deck, players, discards, table, lastMove, livesLeft, hintsLeft } = state
   return {
-    deck, players, discards, table, lastMove, livesLeft, hintsLeft,
-    currentPlayer: getCurrentPlayer(state)
+    board: state,
   }
 }
 

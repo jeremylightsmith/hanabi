@@ -1,5 +1,5 @@
 // @flow
-import { assoc, append, assocPath, curry, flatten, path, pipe, prepend, remove } from 'ramda'
+import { all, append, assoc, assocPath, curry, dec, flatten, path, pipe, prepend, remove } from 'ramda'
 
 import type { BoardT, CardT } from './types'
 import { updateIn } from '../ramda_helpers'
@@ -62,11 +62,22 @@ const removeCard = curry((playerIndex: number, cardIndex: number, board: BoardT)
 
 export const playCard = curry((playerIndex: number, cardIndex: number, board: BoardT) => {
   const card = getCard(playerIndex, cardIndex, board)
-  return pipe(
-    assocPath(['table', colorOf(card)], numberOn(card)),
+  const newBoard = pipe(
     removeCard(playerIndex, cardIndex),
-    assoc('lastMove', {player: playerIndex, type: 'play'}),
+    assoc('lastMove', { player: playerIndex, type: 'play' }),
   )(board)
+
+  const currentCardOnTable = path(['table', colorOf(card)], board) || 0
+  if (numberOn(card) === currentCardOnTable + 1) {
+    return pipe(
+      assocPath(['table', colorOf(card)], numberOn(card)),
+    )(newBoard)
+  } else {
+    return pipe(
+      updateIn(['discards'], prepend(card)),
+      updateIn(['livesLeft'], dec),
+    )(newBoard)
+  }
 })
 
 export const discardCard = curry((playerIndex: number, cardIndex: number, board: BoardT) => {
@@ -74,7 +85,7 @@ export const discardCard = curry((playerIndex: number, cardIndex: number, board:
   return pipe(
     updateIn(['discards'], prepend(card)),
     removeCard(playerIndex, cardIndex),
-    assoc('lastMove', {player: playerIndex, type: 'discard'}),
+    assoc('lastMove', { player: playerIndex, type: 'discard' }),
   )(board)
 })
 
@@ -82,3 +93,7 @@ export const getCurrentPlayer = (board: BoardT) => {
   const lastPlayer = path(['lastMove', 'player'], board)
   return lastPlayer === undefined ? 0 : (lastPlayer + 1) % board.players.length
 }
+
+export const didWin = (board: BoardT) => all(c => board.table[c] === 5, COLORS)
+export const isGameOver = (board: BoardT) => didWin(board) || board.livesLeft === 0
+
