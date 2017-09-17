@@ -136,6 +136,16 @@ const Hints = ({ hints }: {
   </div>
 )
 
+const Deck = ({ cards }: {
+  cards: CardT[],
+}) => (
+  <div className="deck">
+    <h4>Deck</h4>
+
+    {cards.length} cards left
+  </div>
+)
+
 export default class Board extends PureComponent {
   props: {
     board: BoardT,
@@ -144,7 +154,7 @@ export default class Board extends PureComponent {
 
   render() {
     const { dispatch, board } = this.props
-    const { table, discards, players, livesLeft, hintsLeft } = board
+    const { table, discards, deck, players, livesLeft, hintsLeft } = board
     const currentPlayer = getCurrentPlayer(board)
 
     return (
@@ -153,6 +163,7 @@ export default class Board extends PureComponent {
         <Discards discards={discards} />
         <Lives lives={livesLeft} />
         <Hints hints={hintsLeft} />
+        <Deck cards={deck}/>
 
         <div className="players">
           {players && players.map((player, i) =>
