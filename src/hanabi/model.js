@@ -64,7 +64,7 @@ export const playCard = curry((playerIndex: number, cardIndex: number, board: Bo
   const card = getCard(playerIndex, cardIndex, board)
   const newBoard = pipe(
     removeCard(playerIndex, cardIndex),
-    assoc('lastMove', { player: playerIndex, type: 'play' }),
+    assoc('lastMove', { player: playerIndex, type: 'play', card }),
   )(board)
 
   const currentCardOnTable = path(['table', colorOf(card)], board) || 0
@@ -86,7 +86,7 @@ export const discardCard = curry((playerIndex: number, cardIndex: number, board:
     updateIn(['discards'], prepend(card)),
     updateIn(['hintsLeft'], hints => min(inc(hints), 6)),
     removeCard(playerIndex, cardIndex),
-    assoc('lastMove', { player: playerIndex, type: 'discard' }),
+    assoc('lastMove', { player: playerIndex, type: 'discard', card }),
   )(board)
 })
 
