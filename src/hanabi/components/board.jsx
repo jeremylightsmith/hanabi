@@ -1,7 +1,7 @@
 // @flow
 import React, { PureComponent } from 'react'
 import { identity, times } from 'ramda'
-import { discardCard, playCard, startGame } from '../actions'
+import { advance, discardCard, playCard, startGame } from '../actions'
 import type { BoardT, CardT, ColorT, PlayerT } from '../types'
 
 import './board.scss'
@@ -160,7 +160,8 @@ export default class Board extends PureComponent {
           )}
         </div>
 
-        <button onClick={() => dispatch(startGame())}>Restart Game</button>
+        <button className="advance" onClick={() => dispatch(advance())}>Advance</button>
+        <button className="start-game" onClick={() => dispatch(startGame())}>Restart Game</button>
       </div>
     )
   }

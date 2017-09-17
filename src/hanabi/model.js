@@ -1,7 +1,7 @@
 // @flow
-import { all, append, assoc, assocPath, curry, dec, flatten, path, pipe, prepend, remove } from 'ramda'
+import { all, append, assoc, assocPath, curry, dec, flatten, inc, min, path, pipe, prepend, remove } from 'ramda'
 
-import type { BoardT, CardT } from './types'
+import type { BoardT, CardT, HintT } from './types'
 import { updateIn } from '../ramda_helpers'
 
 export const COLORS = ['R', 'G', 'B', 'Y', 'W']
@@ -84,8 +84,16 @@ export const discardCard = curry((playerIndex: number, cardIndex: number, board:
   const card = getCard(playerIndex, cardIndex, board)
   return pipe(
     updateIn(['discards'], prepend(card)),
+    updateIn(['hintsLeft'], hints => min(inc(hints), 6)),
     removeCard(playerIndex, cardIndex),
     assoc('lastMove', { player: playerIndex, type: 'discard' }),
+  )(board)
+})
+
+export const giveHint = curry((playerIndex: number, hint: HintT, board: BoardT) => {
+  return pipe(
+    updateIn(['hintsLeft'], dec),
+    assoc('lastMove', { player: playerIndex, type: 'hint', hint }),
   )(board)
 })
 
@@ -97,3 +105,20 @@ export const getCurrentPlayer = (board: BoardT) => {
 export const didWin = (board: BoardT) => all(c => board.table[c] === 5, COLORS)
 export const isGameOver = (board: BoardT) => didWin(board) || board.livesLeft === 0
 
+type NotifyCallback = (player: number, notes: mixed, prevBoard: BoardT, board: BoardT) => mixed
+export const notifyPlayers = curry((notify: NotifyCallback, prevBoard: BoardT, board: BoardT) => {
+  const lastPlayer = path(['lastMove', 'player'], board)
+  return {
+    ...board,
+    players: board.players.map((player, i) => {
+      if (i === lastPlayer) {
+        return player
+      } else {
+        return {
+          ...player,
+          notes: notify(i, player.notes, prevBoard, board)
+        }
+      }
+    })
+  }
+})

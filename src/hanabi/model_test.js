@@ -1,11 +1,14 @@
 import { expect } from 'chai'
 import { equals, filter } from 'ramda'
-import { dealCard, dealCards, didWin, discardCard, isGameOver, playCard, shuffle } from './model'
+import {
+  dealCard, dealCards, didWin, discardCard, giveHint, isGameOver, notifyPlayers, playCard,
+  shuffle
+} from './model'
 
 describe('hanabi.model', () => {
   describe('#dealCard', () => {
     it('should deal the next card to player X', () => {
-      let state = {
+      let board = {
         deck: ['R1', 'R2', 'R3'],
         players: [
           { hand: [] },
@@ -14,28 +17,28 @@ describe('hanabi.model', () => {
           { hand: [] },
         ]
       }
-      state = dealCard(0, state)
+      board = dealCard(0, board)
 
-      expect(state.deck).to.eql(['R2', 'R3'])
-      expect(state.players[0]).to.eql({ hand: ['R1'] })
+      expect(board.deck).to.eql(['R2', 'R3'])
+      expect(board.players[0]).to.eql({ hand: ['R1'] })
 
-      state = dealCard(1, state)
-      expect(state.deck).to.eql(['R3'])
-      expect(state.players[1]).to.eql({ hand: ['R2'] })
+      board = dealCard(1, board)
+      expect(board.deck).to.eql(['R3'])
+      expect(board.players[1]).to.eql({ hand: ['R2'] })
 
-      state = dealCard(0, state)
-      expect(state.deck).to.eql([])
-      expect(state.players[0]).to.eql({ hand: ['R1', 'R3'] })
+      board = dealCard(0, board)
+      expect(board.deck).to.eql([])
+      expect(board.players[0]).to.eql({ hand: ['R1', 'R3'] })
 
-      state = dealCard(0, state)
-      expect(state.deck).to.eql([])
-      expect(state.players[0]).to.eql({ hand: ['R1', 'R3'] })
+      board = dealCard(0, board)
+      expect(board.deck).to.eql([])
+      expect(board.players[0]).to.eql({ hand: ['R1', 'R3'] })
     })
   })
 
   describe('#dealCards', () => {
     it('should deal 4 cards to each player', () => {
-      let state = {
+      let board = {
         deck: [
           'R1', 'R2', 'R3', 'R4',
           'G1', 'G2', 'G3', 'G4',
@@ -49,9 +52,9 @@ describe('hanabi.model', () => {
           { hand: [] },
         ]
       }
-      state = dealCards(state)
+      board = dealCards(board)
 
-      expect(state).to.eql({
+      expect(board).to.eql({
         deck: ['Y5'],
         players: [
           { hand: ['R1', 'G1', 'B1', 'Y1'] },
@@ -74,7 +77,7 @@ describe('hanabi.model', () => {
 
   describe('#playCard', () => {
     it('should play card if valid', () => {
-      let state = {
+      let board = {
         table: {
           R: null,
           G: null,
@@ -86,8 +89,8 @@ describe('hanabi.model', () => {
         ]
       }
 
-      state = playCard(0, 0, state)
-      expect(state).to.eql({
+      board = playCard(0, 0, board)
+      expect(board).to.eql({
           table: {
             R: 1,
             G: null,
@@ -101,9 +104,9 @@ describe('hanabi.model', () => {
         }
       )
 
-      state = playCard(1, 1, state)
-      state = playCard(1, 0, state)
-      expect(state).to.eql({
+      board = playCard(1, 1, board)
+      board = playCard(1, 0, board)
+      expect(board).to.eql({
           table: {
             R: 2,
             G: 1,
@@ -119,7 +122,7 @@ describe('hanabi.model', () => {
     })
 
     it('should take a life and discard if invalid', () => {
-      let state = {
+      let board = {
         table: {
           R: null,
           G: 1,
@@ -130,8 +133,8 @@ describe('hanabi.model', () => {
         livesLeft: 2,
       }
 
-      state = playCard(0, 0, state)
-      expect(state).to.eql({
+      board = playCard(0, 0, board)
+      expect(board).to.eql({
           table: {
             R: null,
             G: 1,
@@ -144,10 +147,10 @@ describe('hanabi.model', () => {
           lastMove: { player: 0, type: 'play' },
         }
       )
-      expect(isGameOver(state)).to.eql(false)
+      expect(isGameOver(board)).to.eql(false)
 
-      state = playCard(0, 0, state)
-      expect(state).to.eql({
+      board = playCard(0, 0, board)
+      expect(board).to.eql({
           table: {
             R: null,
             G: 1,
@@ -160,8 +163,8 @@ describe('hanabi.model', () => {
           lastMove: { player: 0, type: 'play' },
         }
       )
-      expect(isGameOver(state)).to.eql(true)
-      expect(didWin(state)).to.eql(false)
+      expect(isGameOver(board)).to.eql(true)
+      expect(didWin(board)).to.eql(false)
     })
   })
 
@@ -185,30 +188,107 @@ describe('hanabi.model', () => {
 
   describe('#discardCard', () => {
     it('should discard card', () => {
-      let state = {
+      let board = {
         discards: [],
         players: [
           { hand: ['R1', 'G2', 'Y5'] },
-        ]
+        ],
+        hintsLeft: 2,
       }
 
-      state = discardCard(0, 0, state)
-      expect(state).to.eql({
+      board = discardCard(0, 0, board)
+      expect(board).to.eql({
           discards: ['R1'],
           players: [
             { hand: ['G2', 'Y5'] },
           ],
           lastMove: { player: 0, type: 'discard' },
+          hintsLeft: 3,
         }
       )
 
-      state = discardCard(0, 1, state)
-      expect(state).to.eql({
+      board = discardCard(0, 1, board)
+      expect(board).to.eql({
           discards: ['Y5', 'R1'],
           players: [
             { hand: ['G2'] },
           ],
           lastMove: { player: 0, type: 'discard' },
+          hintsLeft: 4,
+        }
+      )
+    })
+
+    it('should only give back hints to 6', () => {
+      let board = {
+        discards: [],
+        players: [
+          { hand: ['R1', 'G2', 'Y5'] },
+        ],
+        hintsLeft: 6,
+      }
+
+      board = discardCard(0, 0, board)
+      expect(board.hintsLeft).to.eql(6)
+    })
+  })
+
+  describe('#giveHint', () => {
+    it('should give a hint', () => {
+      let board = {
+        hintsLeft: 5,
+        lastMove: null,
+      }
+
+      board = giveHint(0, { player: 1, cards: [1, 2], color: 'G' }, board)
+      expect(board).to.eql({
+        hintsLeft: 4,
+        lastMove: {
+          player: 0,
+          type: 'hint',
+          hint: { player: 1, cards: [1, 2], color: 'G' }
+        },
+      })
+    })
+  })
+
+  describe('#notifyPlayers', () => {
+    it('should tell all players but the one that just played what happened and store their notes', () => {
+      const prevBoard = {
+        players: [
+          { hand: [], notes: { thing: 'zero' } },
+          { hand: ['R1', 'R2'], notes: { thing: 'one' } },
+          { hand: [], notes: { thing: 'two' } },
+        ],
+        lastMove: {
+          player: 1,
+        }
+      }
+      let board = {
+        players: [
+          { hand: [], notes: { thing: 'zero' } },
+          { hand: ['R2'], notes: { thing: 'one' } },
+          { hand: [], notes: { thing: 'two' } },
+        ],
+        lastMove: {
+          player: 2,
+        }
+      }
+      const fn = (player, notes, prevBoard, board) => {
+        expect(prevBoard).to.eql(prevBoard)
+        expect(board).to.eql(board)
+        return { also: `--${player}. ${notes.thing}--` }
+      }
+      board = notifyPlayers(fn, prevBoard, board)
+      expect(board).to.eql({
+          players: [
+            { hand: [], notes: { also: '--0. zero--' } },
+            { hand: ['R2'], notes: { also: '--1. one--' } },
+            { hand: [], notes: { thing: 'two' } },
+          ],
+          lastMove: {
+            player: 2,
+          }
         }
       )
     })

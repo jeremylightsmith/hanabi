@@ -5,21 +5,24 @@ export type CardT = string // like G2, R1, Y5
 
 export type PlayerT = {
   hand: CardT[],
+  notes: mixed,
+}
+
+export type HintT = {
+  player: number,
+  cards: number[],
+  color?: ColorT,
+  number?: number,
 }
 
 export type MoveT = | {
-  player: number,
   type: 'hint',
-  hint: {
-    player: number,
-    cardIndices: number[],
-    color?: ColorT,
-    number?: number,
-  }
-} | {
   player: number,
+  hint: HintT
+} | {
   type: 'play' | 'discard',
-  card: CardT,
+  player: number,
+  card: number,
 }
 
 export type BoardT = {

@@ -1,7 +1,11 @@
 // @flow
 import { pipe } from 'ramda'
 import * as c from '../constants'
-import { dealCard, dealCards, discardCard, playCard, shuffle } from '../model'
+import {
+  dealCard, dealCards, discardCard, getCurrentPlayer, giveHint, notifyPlayers, playCard,
+  shuffle
+} from '../model'
+import * as strategy from '../strategies/mod8_strategy'
 
 export const INITIAL_STATE = {
   deck: [],
@@ -13,7 +17,7 @@ export const INITIAL_STATE = {
   hintsLeft: 8,
 }
 
-export default function reducer(state: any = INITIAL_STATE, action: any) {
+export default function boardReducer(state: any = INITIAL_STATE, action: any) {
   switch (action.type) {
     case c.START_GAME:
       return pipe(
@@ -32,14 +36,28 @@ export default function reducer(state: any = INITIAL_STATE, action: any) {
     case c.PLAY_CARD:
       return pipe(
         playCard(action.player, action.card),
-        dealCard(action.player)
+        dealCard(action.player),
+        notifyPlayers(strategy.playHappened, state),
       )(state)
 
     case c.DISCARD_CARD:
       return pipe(
         discardCard(action.player, action.card),
-        dealCard(action.player)
+        dealCard(action.player),
+        notifyPlayers(strategy.playHappened, state),
       )(state)
+
+    case c.GIVE_HINT:
+      return pipe(
+        giveHint(action.player, action.board),
+        notifyPlayers(strategy.playHappened, state),
+      )(state)
+
+    case c.ADVANCE: {
+      const player = getCurrentPlayer(state)
+      const move = strategy.play(player, state)
+      return boardReducer(state, move)
+    }
 
     default:
       return state

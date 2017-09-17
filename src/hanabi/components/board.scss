@@ -3,8 +3,9 @@ body {
 }
 
 .board {
-  .table {
+  position: relative;
 
+  .table {
   }
 
   .lives {
@@ -23,6 +24,17 @@ body {
       display: inline-block;
       margin-right: 20px;
     }
+  }
+
+  .advance {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+  }
+  .start-game {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
   }
 }
 
