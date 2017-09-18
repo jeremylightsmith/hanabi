@@ -26,6 +26,7 @@ export type MoveT = | {
 }
 
 export type BoardT = {
+  turn: number,
   deck: CardT[],
   players: PlayerT[],
   discards: CardT[],
@@ -33,6 +34,7 @@ export type BoardT = {
   lastMove: ?MoveT,
   livesLeft: number,
   hintsLeft: number,
+  lastTurn?: number,  // set when the cards run out
 }
 
 export type AllBoardsT = {

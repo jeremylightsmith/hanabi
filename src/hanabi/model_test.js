@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { equals, filter } from 'ramda'
 import {
-  dealCard, dealCards, didWin, discardCard, giveHint, isGameOver, notifyPlayers, playCard,
+  dealCard, dealCards, didWin, discardCard, giveHint, incTurn, isGameOver, notifyPlayers, playCard,
   shuffle
 } from './model'
 
@@ -33,6 +33,21 @@ describe('hanabi.model', () => {
       board = dealCard(0, board)
       expect(board.deck).to.eql([])
       expect(board.players[0]).to.eql({ hand: ['R1', 'R3'] })
+    })
+
+    it('should mark last turn when we run out of cards', () => {
+      let board = {
+        turn: 22,
+        deck: ['R1'],
+        players: [
+          { hand: [] },
+          { hand: [] },
+          { hand: [] },
+          { hand: [] },
+        ]
+      }
+      board = dealCard(0, board)
+      expect(board.lastTurn).to.eql(26)
     })
   })
 
@@ -100,7 +115,7 @@ describe('hanabi.model', () => {
             { hand: ['G2', 'Y5'] },
             { hand: ['R2', 'G1', 'Y5'] },
           ],
-          lastMove: { player: 0, type: 'play' },
+          lastMove: { player: 0, type: 'play', card: 'R1' },
         }
       )
 
@@ -116,7 +131,7 @@ describe('hanabi.model', () => {
             { hand: ['G2', 'Y5'] },
             { hand: ['Y5'] },
           ],
-          lastMove: { player: 1, type: 'play' },
+          lastMove: { player: 1, type: 'play', card: 'R2' },
         }
       )
     })
@@ -144,7 +159,7 @@ describe('hanabi.model', () => {
           ],
           discards: ['R3'],
           livesLeft: 1,
-          lastMove: { player: 0, type: 'play' },
+          lastMove: { player: 0, type: 'play', card: 'R3' },
         }
       )
       expect(isGameOver(board)).to.eql(false)
@@ -160,7 +175,7 @@ describe('hanabi.model', () => {
           ],
           discards: ['G3', 'R3'],
           livesLeft: 0,
-          lastMove: { player: 0, type: 'play' },
+          lastMove: { player: 0, type: 'play', card: 'G3' },
         }
       )
       expect(isGameOver(board)).to.eql(true)
@@ -202,7 +217,7 @@ describe('hanabi.model', () => {
           players: [
             { hand: ['G2', 'Y5'] },
           ],
-          lastMove: { player: 0, type: 'discard' },
+          lastMove: { player: 0, type: 'discard', card: 'R1' },
           hintsLeft: 3,
         }
       )
@@ -213,23 +228,23 @@ describe('hanabi.model', () => {
           players: [
             { hand: ['G2'] },
           ],
-          lastMove: { player: 0, type: 'discard' },
+          lastMove: { player: 0, type: 'discard', card: 'Y5' },
           hintsLeft: 4,
         }
       )
     })
 
-    it('should only give back hints to 6', () => {
+    it('should only give back hints to 8', () => {
       let board = {
         discards: [],
         players: [
           { hand: ['R1', 'G2', 'Y5'] },
         ],
-        hintsLeft: 6,
+        hintsLeft: 8,
       }
 
       board = discardCard(0, 0, board)
-      expect(board.hintsLeft).to.eql(6)
+      expect(board.hintsLeft).to.eql(8)
     })
   })
 
@@ -291,6 +306,17 @@ describe('hanabi.model', () => {
           }
         }
       )
+    })
+  })
+
+  describe('#incTurn', () => {
+    it('should increment the turn', () => {
+      let state = {turn: 0}
+      state = incTurn(state)
+      expect(state).to.eql({turn: 1})
+
+      state = incTurn(state)
+      expect(state).to.eql({turn: 2})
     })
   })
 })

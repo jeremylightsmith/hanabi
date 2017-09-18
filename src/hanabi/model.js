@@ -5,6 +5,7 @@ import type { BoardT, CardT, HintT } from './types'
 import { updateIn } from '../ramda_helpers'
 
 export const COLORS = ['R', 'G', 'B', 'Y', 'W']
+export const NUM_HINTS = 8
 
 const newDeck = () => (
   flatten(COLORS.map(color => (
@@ -60,6 +61,8 @@ const removeCard = curry((playerIndex: number, cardIndex: number, board: BoardT)
   updateIn(['players', playerIndex, 'hand'], remove(cardIndex, 1))(board)
 )
 
+export const incTurn = (board: BoardT) => updateIn(['turn'], inc)(board)
+
 export const playCard = curry((playerIndex: number, cardIndex: number, board: BoardT) => {
   const card = getCard(playerIndex, cardIndex, board)
   const newBoard = pipe(
@@ -84,7 +87,7 @@ export const discardCard = curry((playerIndex: number, cardIndex: number, board:
   const card = getCard(playerIndex, cardIndex, board)
   return pipe(
     updateIn(['discards'], prepend(card)),
-    updateIn(['hintsLeft'], hints => min(inc(hints), 6)),
+    updateIn(['hintsLeft'], hints => min(inc(hints), NUM_HINTS)),
     removeCard(playerIndex, cardIndex),
     assoc('lastMove', { player: playerIndex, type: 'discard', card }),
   )(board)
